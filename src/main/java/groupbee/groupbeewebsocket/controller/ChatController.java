@@ -15,6 +15,7 @@ public class ChatController {
 
     // 클라이언트로부터 WebSocket 메시지를 받으면 Kafka 로 전송
     @MessageMapping("/chat")
+    @SendTo("/topic/messages")
     public void handleChatMessage(ChatMessageDto message, ChatRoomDto chatRoom) throws Exception {
         System.out.println(message);
         // 메시지를 Kafka 로 전송 (모든 메시지는 Kafka 로 저장)

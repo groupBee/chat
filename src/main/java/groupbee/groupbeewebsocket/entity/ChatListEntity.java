@@ -20,7 +20,7 @@ public class ChatListEntity {
     private Long id; // Primary Key
 
     @Column(nullable = false, unique = true)
-    private String chatRoomId; // 채팅방 고유 ID
+    private String chatRoomId= "jj"; // 채팅방 고유 ID
 
     @Column(nullable = false)
     private String chatRoomName; // 채팅방 이름 (그룹 채팅일 경우)

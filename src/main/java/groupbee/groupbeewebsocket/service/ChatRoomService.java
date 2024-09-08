@@ -22,7 +22,6 @@ public class ChatRoomService {
     private final Map<String, ChatRoomDto> chatRoomMap = new ConcurrentHashMap<>();
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
-//    private static final String TOPIC = "chatroom-topic";
 
     // 특정 채팅방 ID로 채팅방 정보 가져오기
     public ChatRoomDto getChatRoomById(String chatRoomId) {
@@ -32,14 +31,18 @@ public class ChatRoomService {
     // 새로운 채팅방 생성
     public void createChatRoom(ChatRoomDto chatRoomDto) {
         String TOPIC = chatRoomDto.getTopic();
+        String chatRoomId = UUID.randomUUID().toString();
+
+        chatRoomDto.setChatRoomId(chatRoomId);
         ChatListEntity chatListEntity = new ChatListEntity();
-        chatListEntity.setChatRoomId(chatRoomDto.getChatRoomId());  // 이 부분이 null이 아닌지 확인 필요
+        chatListEntity.setChatRoomId(chatRoomId); // 채팅방 ID 생성
         chatListEntity.setChatRoomName(chatRoomDto.getChatRoomName());
         chatListEntity.setLastMessage(chatRoomDto.getLastMessage());
         chatListEntity.setLastActive(chatRoomDto.getLastActive());
         chatListEntity.setTopic(TOPIC);
+
         if (TOPIC != null && !TOPIC.isEmpty()){
-            chatRoomMap.put(chatRoomDto.getChatRoomId(), chatRoomDto);
+            chatRoomMap.put(chatRoomId, chatRoomDto);
             kafkaTemplate.send(TOPIC, chatRoomDto);
 
             // participants 리스트를 UserEntity로 변환하여 ChatListEntity에 추가

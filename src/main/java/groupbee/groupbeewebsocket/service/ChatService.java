@@ -53,10 +53,10 @@ public class ChatService {
     }
 
     // 1:1 메시지 전송
-    private void sendPrivateMessage(ChatMessageDto message) {
-        messagingTemplate.convertAndSendToUser(message.getRecipientId(), "/queue/messages", message);
-        System.out.println("Sent private message to " + message.getRecipientId());
-    }
+//    private void sendPrivateMessage(ChatMessageDto message) {
+//        messagingTemplate.convertAndSendToUser(message.getRecipientId(), "/queue/messages", message);
+//        System.out.println("Sent private message to " + message.getRecipientId());
+//    }
 
     // 그룹 채팅 메시지 전송
     private void sendGroupMessage(ChatMessageDto message, List<UserDto> participants) {
