@@ -40,5 +40,5 @@ public class ChatListEntity {
     private Date lastActive; // 마지막 활성화 시간
 
     @Column(nullable = false)
-    private boolean isGroupChat; // 그룹 채팅 여부
+    private String topic; // 그룹 채팅 여부
 }

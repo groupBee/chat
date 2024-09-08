@@ -9,6 +9,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -25,23 +26,29 @@ public class ChatService {
 
     // WebSocket 을 통해 메시지 전송 (개인 메시지, 채팅방 메시지, 공지사항)
     public void processMessage(ChatMessageDto message, ChatRoomDto chatRoom) {
+        String kafkaTopic = chatRoom.getTopic();
+
         // 1:1 개인 메시지 처리
-        if (message.getRecipientId() != null && !message.getRecipientId().isEmpty()) {
-            sendPrivateMessage(message);
+        if (kafkaTopic != null && !kafkaTopic.isEmpty()) {
+            // Kafka로 메시지를 전송 (KafkaTemplate 사용)
+            kafkaTemplate.send(kafkaTopic, message);
+            System.out.println("Sent message to Kafka topic: " + kafkaTopic);
+        } else {
+            System.out.println("No Kafka topic specified for this chat room.");
         }
-        // 그룹 채팅일 경우
-        else if (chatRoom.isGroupChat()) {
-            sendGroupMessage(message, chatRoom.getParticipants());
-        }
-        // 공지사항 또는 채팅방 메시지 처리
-        else if (message.getChatRoomId() != null && !message.getChatRoomId().isEmpty()) {
-            sendRoomMessage(message);
-        }
+
+        // 나머지 로직은 그대로 유지 (1:1 메시지, 그룹 채팅 등)
+//        if (message.getRecipientId() != null && !message.getRecipientId().isEmpty()) {
+//            sendPrivateMessage(message);
+//        } else if (chatRoom.isGroupChat()) {
+//            sendGroupMessage(message, chatRoom.getParticipants());
+//        } else if (message.getChatRoomId() != null && !message.getChatRoomId().isEmpty()) {
+//            sendRoomMessage(message);
+//        }
 
         // 파일이 첨부된 경우 처리
         if (message.getFileUrl() != null && !message.getFileUrl().isEmpty()) {
             System.out.println("File attached: " + message.getFileUrl());
-            // 파일 처리 로직 추가 가능 (예: 클라이언트에 파일 URL 전송)
         }
     }
 

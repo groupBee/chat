@@ -1,6 +1,7 @@
 package groupbee.groupbeewebsocket.config;
 
 import groupbee.groupbeewebsocket.dto.ChatMessageDto;
+import groupbee.groupbeewebsocket.dto.ChatRoomDto;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -20,56 +21,80 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
+    // ChatRoomDto 관련 설정
     @Bean
-    public Map<String, Object> producerConfigs() { // kafka 메세지를 보내는 역할
-        Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "211.188.55.137:29092");
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return props;
-    }
-
-    @Bean
-    public ProducerFactory<String, ChatMessageDto> producerFactory() {
+    public ProducerFactory<String, ChatRoomDto> chatRoomProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "211.188.55.137:29092");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class); // Ensure to use JSON Serializer
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
     @Bean
-    public KafkaTemplate<String, ChatMessageDto> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+    public KafkaTemplate<String, ChatRoomDto> chatRoomDtoKafkaTemplate() {
+        return new KafkaTemplate<>(chatRoomProducerFactory());
     }
 
+    // ChatMessageDto 관련 설정
+    @Bean
+    public ProducerFactory<String, ChatMessageDto> chatMessageProducerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "211.188.55.137:29092");
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
 
     @Bean
-    public Map<String, Object> consumerConfigs() { // kafka 메세지를 받는 역할
+    public KafkaTemplate<String, ChatMessageDto> chatMessageDtoKafkaTemplate() {
+        return new KafkaTemplate<>(chatMessageProducerFactory());
+    }
+
+    // Consumer 설정 (공통 설정)
+    @Bean
+    public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "211.188.55.137:29092");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "chat-group");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         return props;
     }
 
+    // ChatRoomDto Consumer 설정
     @Bean
-    public ConsumerFactory<String, ChatMessageDto> consumerFactory() {
+    public ConsumerFactory<String, ChatRoomDto> chatRoomDtoConsumerFactory() {
         Map<String, Object> props = consumerConfigs();
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-
-        JsonDeserializer<ChatMessageDto> deserializer = new JsonDeserializer<>(ChatMessageDto.class);
-        deserializer.addTrustedPackages("*"); // 패키지 신뢰 추가
+        JsonDeserializer<ChatRoomDto> deserializer = new JsonDeserializer<>(ChatRoomDto.class);
+        deserializer.addTrustedPackages("*");
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageDto> kafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, ChatRoomDto> chatRoomDtoKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ChatRoomDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(chatRoomDtoConsumerFactory());
+        return factory;
+    }
+
+    // ChatMessageDto Consumer 설정
+    @Bean
+    public ConsumerFactory<String, ChatMessageDto> chatMessageDtoConsumerFactory() {
+        Map<String, Object> props = consumerConfigs();
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        JsonDeserializer<ChatMessageDto> deserializer = new JsonDeserializer<>(ChatMessageDto.class);
+        deserializer.addTrustedPackages("*");
+
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageDto> chatMessageDtoKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ChatMessageDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(chatMessageDtoConsumerFactory());
         return factory;
     }
 }

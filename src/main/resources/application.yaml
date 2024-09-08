@@ -43,6 +43,6 @@ spring:
 
 springdoc:
   api-docs:
-    path: /api/book/swagger
+    path: /api/chat/swagger
   swagger-ui:
-    path: /api/book/swagger
+    path: /api/chat/swagger
