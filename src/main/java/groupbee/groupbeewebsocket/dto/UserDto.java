@@ -1,4 +1,4 @@
-package dto;
+package groupbee.groupbeewebsocket.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

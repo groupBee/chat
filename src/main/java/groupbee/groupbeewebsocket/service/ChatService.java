@@ -1,8 +1,8 @@
-package service;
+package groupbee.groupbeewebsocket.service;
 
-import dto.ChatMessageDto;
-import dto.ChatRoomDto;
-import dto.UserDto;
+import groupbee.groupbeewebsocket.dto.ChatMessageDto;
+import groupbee.groupbeewebsocket.dto.ChatRoomDto;
+import groupbee.groupbeewebsocket.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -23,7 +23,7 @@ public class ChatService {
         System.out.println("Sent message to Kafka: " + message);
     }
 
-    // WebSocket을 통해 메시지 전송 (개인 메시지, 채팅방 메시지, 공지사항)
+    // WebSocket 을 통해 메시지 전송 (개인 메시지, 채팅방 메시지, 공지사항)
     public void processMessage(ChatMessageDto message, ChatRoomDto chatRoom) {
         // 1:1 개인 메시지 처리
         if (message.getRecipientId() != null && !message.getRecipientId().isEmpty()) {

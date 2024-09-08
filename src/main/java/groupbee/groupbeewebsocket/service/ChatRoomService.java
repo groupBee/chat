@@ -1,14 +1,19 @@
-package service;
+package groupbee.groupbeewebsocket.service;
 
-import dto.ChatRoomDto;
+import groupbee.groupbeewebsocket.dto.ChatRoomDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@RequiredArgsConstructor
 public class ChatRoomService {
-    // 메모리 상의 채팅방 목록을 관리하기 위한 예시
-    private final Map<String, ChatRoomDto> chatRoomMap = new HashMap<>();
+    private final KafkaTemplate<String, ChatRoomDto> kafkaTemplate;
+    private final Map<String, ChatRoomDto> chatRoomMap = new ConcurrentHashMap<>();
+    private static final String TOPIC = "chatroom-topic";
 
     // 특정 채팅방 ID로 채팅방 정보 가져오기
     public ChatRoomDto getChatRoomById(String chatRoomId) {
@@ -18,6 +23,7 @@ public class ChatRoomService {
     // 새로운 채팅방 생성
     public void createChatRoom(ChatRoomDto chatRoomDto) {
         chatRoomMap.put(chatRoomDto.getChatRoomId(), chatRoomDto);
+        kafkaTemplate.send(TOPIC, chatRoomDto);
         System.out.println("Created new chat room: " + chatRoomDto);
     }
 
