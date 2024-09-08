@@ -35,3 +35,103 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Windows specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+# macOS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+# IntelliJ IDEA specific files
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+# Redis specific files
+dump.rdb
+*.log
+# MongoDB specific files
+*.lock
+*.log
+*.pid
+*.sock
+# PostgreSQL specific files
+pgdata/
+pg_xlog/
+pg_log/
+# Log files
+logs/
+*.log
+# Runtime files
+*.pid
+*.seed
+# Coverage results
+coverage/
+*.lcov
+# Dependency directories
+node_modules/
+bower_components/
+jspm_packages/
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+# macOS generated files
+.DS_Store
+# Windows generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+# IntelliJ IDEA generated files
+.idea/
+*.iws
+*.iml
+*.ipr
+# IntelliJ IDEA log files
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/httpRequests
+# IntelliJ IDEA project files
+*.iws
+*.iml
+*.ipr
+out/
+# Redis dump file
+dump.rdb
+# Redis append only file
+appendonly.aof
+# PostgreSQL data directory
+pgdata/
+# PostgreSQL log files
+pg_log/
+# MongoDB data directory
+data/
+logs/
+# OS-specific files
+*.swp
+*~
+.nfs*
+# Python specific files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.py[cod]
+*$py.class
+# Temporary files
+tmp/
+temp/
+# JetBrains IDEs
+*.iml
+.idea/
+*.ipr
+out/
