@@ -8,6 +8,7 @@ import groupbee.groupbeewebsocket.service.ChatRoomService;
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/chat")
@@ -19,11 +20,5 @@ public class ChatRoomController {
     public ChatRoomDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto) {
         chatRoomService.createChatRoom(chatRoomDto);
         return chatRoomDto;
-    }
-
-    // 모든 채팅방 목록을 가져오는 엔드포인트
-    @GetMapping("/list/chatroom")
-    public List<ChatRoomDto> getChatRooms() {
-        return new ArrayList<>(chatRoomService.getAllChatRooms());
     }
 }

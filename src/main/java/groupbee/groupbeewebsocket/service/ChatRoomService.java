@@ -23,11 +23,6 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
 
-    // 특정 채팅방 ID로 채팅방 정보 가져오기
-    public ChatRoomDto getChatRoomById(String chatRoomId) {
-        return chatRoomMap.get(chatRoomId); // 메모리에서 가져옴 (추후 DB로 대체 가능)
-    }
-
     // 새로운 채팅방 생성
     public void createChatRoom(ChatRoomDto chatRoomDto) {
         String TOPIC = chatRoomDto.getTopic();
@@ -38,8 +33,11 @@ public class ChatRoomService {
         chatListEntity.setChatRoomId(chatRoomId); // 채팅방 ID 생성
         chatListEntity.setChatRoomName(chatRoomDto.getChatRoomName());
         chatListEntity.setLastMessage(chatRoomDto.getLastMessage());
-        chatListEntity.setLastActive(chatRoomDto.getLastActive());
         chatListEntity.setTopic(TOPIC);
+
+        if(chatRoomDto.getLastActive() == null) {
+            chatRoomDto.setLastActive(new Date());
+        }
 
         if (TOPIC != null && !TOPIC.isEmpty()){
             chatRoomMap.put(chatRoomId, chatRoomDto);
@@ -67,17 +65,6 @@ public class ChatRoomService {
             log.error("Chat room id is empty : ChatRoomService");
         }
     }
-
-    // 채팅방에 메시지 기록 업데이트
-    public void updateLastMessage(String chatRoomId, String lastMessage) {
-        ChatRoomDto chatRoom = chatRoomMap.get(chatRoomId);
-        if (chatRoom != null) {
-            chatRoom.setLastMessage(lastMessage);
-            chatRoom.setLastActive(new Date()); // 마지막 활성화 시간 업데이트
-            System.out.println("Updated last message in chat room " + chatRoomId);
-        }
-    }
-
     public List<ChatRoomDto> getAllChatRooms() {
         return new ArrayList<>(chatRoomMap.values()); // 모든 채팅방 반환
     }

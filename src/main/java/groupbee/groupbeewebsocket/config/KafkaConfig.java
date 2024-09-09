@@ -2,6 +2,7 @@ package groupbee.groupbeewebsocket.config;
 
 import groupbee.groupbeewebsocket.dto.ChatMessageDto;
 import groupbee.groupbeewebsocket.dto.ChatRoomDto;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -11,12 +12,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.messaging.converter.MessageConversionException;
+import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @EnableKafka
 @Configuration
 public class KafkaConfig {
@@ -43,6 +48,7 @@ public class KafkaConfig {
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "211.188.55.137:29092");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        configProps.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, "true");  // 타입 정보를 헤더에 포함시킴
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
@@ -85,8 +91,11 @@ public class KafkaConfig {
     public ConsumerFactory<String, ChatMessageDto> chatMessageDtoConsumerFactory() {
         Map<String, Object> props = consumerConfigs();
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+
         JsonDeserializer<ChatMessageDto> deserializer = new JsonDeserializer<>(ChatMessageDto.class);
         deserializer.addTrustedPackages("*");
+        deserializer.setRemoveTypeHeaders(false);
+        deserializer.setUseTypeMapperForKey(false);
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }
@@ -95,6 +104,19 @@ public class KafkaConfig {
     public ConcurrentKafkaListenerContainerFactory<String, ChatMessageDto> chatMessageDtoKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ChatMessageDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(chatMessageDtoConsumerFactory());
+
+        factory.setCommonErrorHandler(new DefaultErrorHandler(
+                (record, exception) -> {
+                    if (exception instanceof MessageConversionException) {
+                        // 메시지 역직렬화 오류 처리
+                        log.error("Error converting Kafka message to ChatMessageDto: {}", record, exception);
+                    } else {
+                        // 기타 오류 처리
+                        log.error("Error processing Kafka message: {}", record, exception);
+                    }
+                },
+                new FixedBackOff(1000L, 3)
+        ));
         return factory;
     }
 }
