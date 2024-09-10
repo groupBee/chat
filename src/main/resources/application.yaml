@@ -3,10 +3,11 @@ server:
 
 spring:
   kafka:
-    bootstrap-servers: 211.188.55.137:29092
+    bootstrap-servers: ${KAFKA_URL}
     consumer:
       group-id: chat-group
-      auto-offset-reset: earliest
+      auto-offset-reset: earliest       # 토픽의 처음부터 읽기
+      enable-auto-commit: false          # 오프셋 자동 커밋 비활성화
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
@@ -18,6 +19,13 @@ spring:
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      jdbc-url: ${CHAT_DATASOURCE_URL}  # HikariCP에서도 인식하도록 설정 (중복되지만 필요)
+      maximum-pool-size: 10             # 필요 시 HikariCP 옵션 추가
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      pool-name: HikariPool-1
 
   servlet:
     multipart:
@@ -26,7 +34,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     generate-ddl: true
     show-sql: true
     database: postgresql
@@ -36,10 +44,9 @@ spring:
         format_sql: true
 
   data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
+    mongodb:
+      uri: mongodb://100.64.0.11:27017/final
+      database: chat
 
 springdoc:
   api-docs:

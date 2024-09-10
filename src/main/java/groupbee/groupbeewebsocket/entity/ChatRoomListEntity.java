@@ -3,7 +3,7 @@ package groupbee.groupbeewebsocket.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "chat_list")
-public class ChatListEntity {
+public class ChatRoomListEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Primary Key
@@ -37,7 +37,7 @@ public class ChatListEntity {
     private String lastMessage; // 마지막 메시지 내용 (미리보기용)
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastActive; // 마지막 활성화 시간
+    private LocalDateTime lastActive; // 마지막 활성화 시간
 
     @Column(nullable = false)
     private String topic; // 그룹 채팅 여부

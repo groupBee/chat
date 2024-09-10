@@ -2,7 +2,7 @@ package groupbee.groupbeewebsocket.service;
 
 import groupbee.groupbeewebsocket.dto.ChatRoomDto;
 import groupbee.groupbeewebsocket.dto.UserDto;
-import groupbee.groupbeewebsocket.entity.ChatListEntity;
+import groupbee.groupbeewebsocket.entity.ChatRoomListEntity;
 import groupbee.groupbeewebsocket.entity.UserEntity;
 import groupbee.groupbeewebsocket.repository.ChatRoomRepository;
 import groupbee.groupbeewebsocket.repository.UserRepository;
@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,25 +23,28 @@ public class ChatRoomService {
     private final Map<String, ChatRoomDto> chatRoomMap = new ConcurrentHashMap<>();
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final List<ChatRoomDto> chatRoomList = new ArrayList<>(); // 메시지 저장소
 
     // 새로운 채팅방 생성
     public void createChatRoom(ChatRoomDto chatRoomDto) {
         String TOPIC = chatRoomDto.getTopic();
-        String chatRoomId = UUID.randomUUID().toString();
+//        String chatRoomId = UUID.randomUUID().toString();
+//        chatRoomDto.setChatRoomId(chatRoomId);
 
-        chatRoomDto.setChatRoomId(chatRoomId);
-        ChatListEntity chatListEntity = new ChatListEntity();
-        chatListEntity.setChatRoomId(chatRoomId); // 채팅방 ID 생성
-        chatListEntity.setChatRoomName(chatRoomDto.getChatRoomName());
-        chatListEntity.setLastMessage(chatRoomDto.getLastMessage());
-        chatListEntity.setTopic(TOPIC);
+        ChatRoomListEntity chatRoomListEntity = new ChatRoomListEntity();
+//        chatListEntity.setChatRoomId(chatRoomId); // 채팅방 ID 생성
+        chatRoomListEntity.setChatRoomId(chatRoomDto.getChatRoomId());
+        chatRoomListEntity.setChatRoomName(chatRoomDto.getChatRoomName());
+        chatRoomListEntity.setLastMessage(chatRoomDto.getLastMessage());
+        chatRoomListEntity.setTopic(TOPIC);
 
         if(chatRoomDto.getLastActive() == null) {
-            chatRoomDto.setLastActive(new Date());
+            chatRoomDto.setLastActive(LocalDateTime.now());
         }
 
         if (TOPIC != null && !TOPIC.isEmpty()){
-            chatRoomMap.put(chatRoomId, chatRoomDto);
+//            chatRoomMap.put(chatRoomId, chatRoomDto);
+            chatRoomMap.put(chatRoomDto.getChatRoomId(), chatRoomDto);
             kafkaTemplate.send(TOPIC, chatRoomDto);
 
             // participants 리스트를 UserEntity로 변환하여 ChatListEntity에 추가
@@ -56,16 +60,30 @@ public class ChatRoomService {
                         });
                 participants.add(userEntity);
             }
-            chatListEntity.setParticipants(participants);
+            chatRoomListEntity.setParticipants(participants);
 
             // ChatListEntity 저장
-            chatRoomRepository.save(chatListEntity);
+            chatRoomRepository.save(chatRoomListEntity);
             System.out.println("Created new chat room: " + chatRoomDto);
         } else {
             log.error("Chat room id is empty : ChatRoomService");
         }
     }
+
     public List<ChatRoomDto> getAllChatRooms() {
         return new ArrayList<>(chatRoomMap.values()); // 모든 채팅방 반환
+    }
+
+    // 사용자가 속한 채팅방 필터링하여 반환
+    public List<ChatRoomDto> getChatRoomsForUser(String userId) {
+        List<ChatRoomDto> userChatRooms = new ArrayList<>();
+        for (ChatRoomDto chatRoom : chatRoomMap.values()) {
+            boolean isUserInRoom = chatRoom.getParticipants().stream()
+                    .anyMatch(participant -> participant.getUserId().equals(userId));
+            if (isUserInRoom) {
+                userChatRooms.add(chatRoom);
+            }
+        }
+        return userChatRooms;
     }
 }
