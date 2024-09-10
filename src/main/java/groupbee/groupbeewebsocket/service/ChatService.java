@@ -26,11 +26,11 @@ public class ChatService {
         if (kafkaTopic != null && !kafkaTopic.isEmpty()) {
             if (kafkaTopic.equals("one")){
                 // Kafka 로 메시지를 전송 (KafkaTemplate 사용)
-                kafkaTemplate.send(kafkaTopic, message);
+                kafkaTemplate.send("one-to-one-chat", message.getChatRoomId(), message);
                 log.info("ChatService one to one : {}", kafkaTopic);
             } else if(kafkaTopic.equals("many")) {
                 // Kafka 로 메시지를 전송 (KafkaTemplate 사용)
-                kafkaTemplate.send(kafkaTopic, message);
+                kafkaTemplate.send("one-to-many-chat", message.getChatRoomId(), message);
                 log.info("ChatService one to many: {}", kafkaTopic);
             }
         } else {

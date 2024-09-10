@@ -28,11 +28,8 @@ public class ChatRoomService {
     // 새로운 채팅방 생성
     public void createChatRoom(ChatRoomDto chatRoomDto) {
         String TOPIC = chatRoomDto.getTopic();
-//        String chatRoomId = UUID.randomUUID().toString();
-//        chatRoomDto.setChatRoomId(chatRoomId);
 
         ChatRoomListEntity chatRoomListEntity = new ChatRoomListEntity();
-//        chatListEntity.setChatRoomId(chatRoomId); // 채팅방 ID 생성
         chatRoomListEntity.setChatRoomId(chatRoomDto.getChatRoomId());
         chatRoomListEntity.setChatRoomName(chatRoomDto.getChatRoomName());
         chatRoomListEntity.setLastMessage(chatRoomDto.getLastMessage());
@@ -43,7 +40,6 @@ public class ChatRoomService {
         }
 
         if (TOPIC != null && !TOPIC.isEmpty()){
-//            chatRoomMap.put(chatRoomId, chatRoomDto);
             chatRoomMap.put(chatRoomDto.getChatRoomId(), chatRoomDto);
             kafkaTemplate.send(TOPIC, chatRoomDto);
 
@@ -85,5 +81,14 @@ public class ChatRoomService {
             }
         }
         return userChatRooms;
+    }
+
+    public void exitChatRoom(String chatRoomId, String userId) {
+        ChatRoomListEntity chatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
+        System.out.println(chatRoom);
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("ChatRoomService exitChatRoom" + userId));
+        chatRoom.getParticipants().remove(user);
+        chatRoomRepository.save(chatRoom);
     }
 }

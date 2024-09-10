@@ -2,6 +2,7 @@ package groupbee.groupbeewebsocket.controller;
 
 import groupbee.groupbeewebsocket.dto.ChatMessageDto;
 import groupbee.groupbeewebsocket.dto.ChatRoomDto;
+import groupbee.groupbeewebsocket.dto.UserDto;
 import groupbee.groupbeewebsocket.service.ChatService;
 import groupbee.groupbeewebsocket.service.KafkaConsumerService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,6 @@ public class ChatRoomController {
     public ChatRoomDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto) {
         String UUID = java.util.UUID.randomUUID().toString();
         chatRoomDto.setChatRoomId(UUID);
-        System.out.println("컨트롤러에서 찍은거임 : " + chatRoomDto.toString());
         chatRoomService.createChatRoom(chatRoomDto);
         return chatRoomDto;
     }
@@ -36,9 +36,22 @@ public class ChatRoomController {
         return kafkaConsumerService.getChatHistory(chatRoomId);
     }
 
-    @GetMapping("/chatting/list/{userId}")
-    public ResponseEntity<List<ChatRoomDto>> getUserChatRooms(@PathVariable String userId) {
+    @PostMapping("/chatting/list")
+    public ResponseEntity<List<ChatRoomDto>> getUserChatRooms(@RequestBody UserDto userDto) {
+        String userId = userDto.getUserId();
         List<ChatRoomDto> userChatRooms = chatRoomService.getChatRoomsForUser(userId);
         return ResponseEntity.ok(userChatRooms);
     }
+
+    @DeleteMapping("/chatting/delete")
+    public void exitChatRoom(@RequestParam String chatRoomId,
+                             @RequestParam String userId) {
+        chatRoomService.exitChatRoom(chatRoomId, userId);
+    }
+
+    @PostMapping("update/chatRoomName")
+    public void changeChattingRoomName(@RequestBody ChatRoomDto chatRoomDto) {
+
+    }
+
 }

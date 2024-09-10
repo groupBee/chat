@@ -14,7 +14,7 @@ import java.util.Map;
 public class ChatMessageDto {
     private String chatRoomId;      // 채팅방 고유 ID
     private String senderId;        // 메시지를 보낸 사용자 ID
-    private String senderName;  // 메시지를 보낸 사용자의 닉네임
+    private String senderName;  // 메시지를 보낸 사용자의 이름
     private List<UserDto> recipientId;     // 1:1 대화일 경우 상대방 ID
     private String content;         // 메시지 내용
     private String announcement;    // 공지사항일 경우 내용

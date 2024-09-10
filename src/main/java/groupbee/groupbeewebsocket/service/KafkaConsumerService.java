@@ -22,19 +22,27 @@ public class KafkaConsumerService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final List<ChatMessageDto> chatMessages = new ArrayList<>();
 
-    @KafkaListener(topics = "one", groupId = "chat-group")
+    @KafkaListener(topics = "one-to-one-chat", groupId = "chat-group")
     public void consume(ConsumerRecord<String, String> record, Consumer<?, ?> consumer) {
         try {
             // Kafka 에서 가져온 메시지를 ChatMessageDto 로 변환
             ChatMessageDto chatMessageDto = objectMapper.readValue(record.value(), ChatMessageDto.class);
-
             // 이전에 받은 메시지들을 리스트에 저장
             chatMessages.add(chatMessageDto);
-
             // WebSocket 으로 실시간 메시지 전송
             messagingTemplate.convertAndSend("/topic/messages/" + chatMessageDto.getChatRoomId(), chatMessageDto);
         } catch (Exception e) {
             log.error("메시지 처리 중 오류 발생", e);
         }
+    }
+
+    public List<ChatMessageDto> getChatHistory(String chatRoomId) {
+        List<ChatMessageDto> filteredMessages = new ArrayList<>();
+        for (ChatMessageDto message : chatMessages) {
+            if (message.getChatRoomId().equals(chatRoomId)) {
+                filteredMessages.add(message);
+            }
+        }
+        return filteredMessages;
     }
 }
