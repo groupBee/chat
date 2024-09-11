@@ -1,6 +1,6 @@
 server:
-  port: 9999
-
+  port: 9522
+#  port: 9999
 spring:
   kafka:
     bootstrap-servers: ${KAFKA_URL}
@@ -19,13 +19,12 @@ spring:
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
-    hikari:
-      jdbc-url: ${CHAT_DATASOURCE_URL}  # HikariCP에서도 인식하도록 설정 (중복되지만 필요)
-      maximum-pool-size: 10             # 필요 시 HikariCP 옵션 추가
-      minimum-idle: 5
-      idle-timeout: 30000
-      max-lifetime: 1800000
-      pool-name: HikariPool-1
+
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: groupbee
+
 
   servlet:
     multipart:
@@ -34,7 +33,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     generate-ddl: true
     show-sql: true
     database: postgresql
@@ -42,11 +41,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
-  data:
-    mongodb:
-      uri: mongodb://100.64.0.11:27017/final
-      database: chat
 
 springdoc:
   api-docs:

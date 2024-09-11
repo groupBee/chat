@@ -1,9 +1,11 @@
 package groupbee.groupbeewebsocket.service;
 
+import groupbee.groupbeewebsocket.dto.ChatMessageDto;
 import groupbee.groupbeewebsocket.dto.ChatRoomDto;
 import groupbee.groupbeewebsocket.dto.UserDto;
 import groupbee.groupbeewebsocket.entity.ChatRoomListEntity;
 import groupbee.groupbeewebsocket.entity.UserEntity;
+import groupbee.groupbeewebsocket.repository.ChatMessageRepository;
 import groupbee.groupbeewebsocket.repository.ChatRoomRepository;
 import groupbee.groupbeewebsocket.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,15 +26,13 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final List<ChatRoomDto> chatRoomList = new ArrayList<>(); // 메시지 저장소
+    private final ChatMessageRepository chatMessageRepository;
 
     // 새로운 채팅방 생성
     public void createChatRoom(ChatRoomDto chatRoomDto) {
         String TOPIC = chatRoomDto.getTopic();
-//        String chatRoomId = UUID.randomUUID().toString();
-//        chatRoomDto.setChatRoomId(chatRoomId);
 
         ChatRoomListEntity chatRoomListEntity = new ChatRoomListEntity();
-//        chatListEntity.setChatRoomId(chatRoomId); // 채팅방 ID 생성
         chatRoomListEntity.setChatRoomId(chatRoomDto.getChatRoomId());
         chatRoomListEntity.setChatRoomName(chatRoomDto.getChatRoomName());
         chatRoomListEntity.setLastMessage(chatRoomDto.getLastMessage());
@@ -43,7 +43,6 @@ public class ChatRoomService {
         }
 
         if (TOPIC != null && !TOPIC.isEmpty()){
-//            chatRoomMap.put(chatRoomId, chatRoomDto);
             chatRoomMap.put(chatRoomDto.getChatRoomId(), chatRoomDto);
             kafkaTemplate.send(TOPIC, chatRoomDto);
 
@@ -74,16 +73,34 @@ public class ChatRoomService {
         return new ArrayList<>(chatRoomMap.values()); // 모든 채팅방 반환
     }
 
-    // 사용자가 속한 채팅방 필터링하여 반환
-    public List<ChatRoomDto> getChatRoomsForUser(String userId) {
-        List<ChatRoomDto> userChatRooms = new ArrayList<>();
-        for (ChatRoomDto chatRoom : chatRoomMap.values()) {
-            boolean isUserInRoom = chatRoom.getParticipants().stream()
-                    .anyMatch(participant -> participant.getUserId().equals(userId));
-            if (isUserInRoom) {
-                userChatRooms.add(chatRoom);
-            }
+    public List<ChatRoomListEntity> getChatRoomsForUser(String userId) {
+        return chatRoomRepository.findByParticipantsUserId(userId);
+    }
+
+    public void exitChatRoom(String chatRoomId, String userId) {
+        ChatRoomListEntity chatRoom = chatRoomRepository.findByChatRoomId(chatRoomId);
+        System.out.println(chatRoom);
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("ChatRoomService exitChatRoom" + userId));
+        chatRoom.getParticipants().remove(user);
+        chatRoomRepository.save(chatRoom);
+    }
+
+    public void exitChatRoomAll(String userId) {
+        List<ChatRoomListEntity> userChatRooms = chatRoomRepository.findByParticipantsUserId(userId);
+        // 유저 조회
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다: " + userId));
+
+        // 각 채팅방에서 유저 제거
+        for (ChatRoomListEntity chatRoom : userChatRooms) {
+            chatRoom.getParticipants().remove(user);
+            chatRoomRepository.save(chatRoom);  // 변경된 내용을 DB에 저장
         }
-        return userChatRooms;
+    }
+
+    public List<ChatMessageDto> getMessageDetail(String chatRoomId) {
+        log.info(chatMessageRepository.findByChatRoomId(chatRoomId).toString());
+        return chatMessageRepository.findByChatRoomId(chatRoomId);
     }
 }

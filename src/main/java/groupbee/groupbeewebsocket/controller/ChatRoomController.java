@@ -2,16 +2,15 @@ package groupbee.groupbeewebsocket.controller;
 
 import groupbee.groupbeewebsocket.dto.ChatMessageDto;
 import groupbee.groupbeewebsocket.dto.ChatRoomDto;
-import groupbee.groupbeewebsocket.service.ChatService;
+import groupbee.groupbeewebsocket.dto.UserDto;
+import groupbee.groupbeewebsocket.entity.ChatRoomListEntity;
 import groupbee.groupbeewebsocket.service.KafkaConsumerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import groupbee.groupbeewebsocket.service.ChatRoomService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -26,19 +25,36 @@ public class ChatRoomController {
     public ChatRoomDto createChatRoom(@RequestBody ChatRoomDto chatRoomDto) {
         String UUID = java.util.UUID.randomUUID().toString();
         chatRoomDto.setChatRoomId(UUID);
-        System.out.println("컨트롤러에서 찍은거임 : " + chatRoomDto.toString());
         chatRoomService.createChatRoom(chatRoomDto);
         return chatRoomDto;
     }
 
     @GetMapping("/chatting/history")
     public List<ChatMessageDto> getChatHistory(@RequestParam String chatRoomId) {
-        return kafkaConsumerService.getChatHistory(chatRoomId);
+        return chatRoomService.getMessageDetail(chatRoomId);
     }
 
-    @GetMapping("/chatting/list/{userId}")
-    public ResponseEntity<List<ChatRoomDto>> getUserChatRooms(@PathVariable String userId) {
-        List<ChatRoomDto> userChatRooms = chatRoomService.getChatRoomsForUser(userId);
+    @PostMapping("/chatting/list")
+    public ResponseEntity<List<ChatRoomListEntity>> getUserChatRooms(@RequestBody UserDto userDto) {
+        String userId = userDto.getUserId();
+        List<ChatRoomListEntity> userChatRooms = chatRoomService.getChatRoomsForUser(userId);
         return ResponseEntity.ok(userChatRooms);
     }
+
+    @DeleteMapping("/chatting/delete")
+    public void exitChatRoom(@RequestParam String chatRoomId,
+                             @RequestParam String userId) {
+        chatRoomService.exitChatRoom(chatRoomId, userId);
+    }
+
+    @DeleteMapping("/chatting/exitAll")
+    public void exitChatRoom(@RequestParam String userId){
+        chatRoomService.exitChatRoomAll(userId);
+    }
+
+    @PostMapping("update/chatRoomName")
+    public void changeChattingRoomName(@RequestBody ChatRoomDto chatRoomDto) {
+
+    }
+
 }
