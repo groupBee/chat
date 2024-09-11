@@ -22,7 +22,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ChatService {
     private final KafkaTemplate<String, ChatMessageDto> kafkaTemplate;
-    private final SimpMessagingTemplate messagingTemplate;
     private final ChatRoomRepository chatRoomRepository;
 
     @Transactional
@@ -48,7 +47,6 @@ public class ChatService {
         if (message.getFileUrl() != null && !message.getFileUrl().isEmpty()) {
             System.out.println("File attached: " + message.getFileUrl());
         }
-        //message.setTimestamp(LocalDateTime.now());
         updateChatRoomInfo(message);
     }
 
