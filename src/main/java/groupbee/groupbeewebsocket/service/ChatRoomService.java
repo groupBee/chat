@@ -73,17 +73,8 @@ public class ChatRoomService {
         return new ArrayList<>(chatRoomMap.values()); // 모든 채팅방 반환
     }
 
-    // 사용자가 속한 채팅방 필터링하여 반환
-    public List<ChatRoomDto> getChatRoomsForUser(String userId) {
-        List<ChatRoomDto> userChatRooms = new ArrayList<>();
-        for (ChatRoomDto chatRoom : chatRoomMap.values()) {
-            boolean isUserInRoom = chatRoom.getParticipants().stream()
-                    .anyMatch(participant -> participant.getUserId().equals(userId));
-            if (isUserInRoom) {
-                userChatRooms.add(chatRoom);
-            }
-        }
-        return userChatRooms;
+    public List<ChatRoomListEntity> getChatRoomsForUser(String userId) {
+        return chatRoomRepository.findByParticipantsUserId(userId);
     }
 
     public void exitChatRoom(String chatRoomId, String userId) {
@@ -93,6 +84,19 @@ public class ChatRoomService {
                 .orElseThrow(() -> new IllegalArgumentException("ChatRoomService exitChatRoom" + userId));
         chatRoom.getParticipants().remove(user);
         chatRoomRepository.save(chatRoom);
+    }
+
+    public void exitChatRoomAll(String userId) {
+        List<ChatRoomListEntity> userChatRooms = chatRoomRepository.findByParticipantsUserId(userId);
+        // 유저 조회
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다: " + userId));
+
+        // 각 채팅방에서 유저 제거
+        for (ChatRoomListEntity chatRoom : userChatRooms) {
+            chatRoom.getParticipants().remove(user);
+            chatRoomRepository.save(chatRoom);  // 변경된 내용을 DB에 저장
+        }
     }
 
     public List<ChatMessageDto> getMessageDetail(String chatRoomId) {

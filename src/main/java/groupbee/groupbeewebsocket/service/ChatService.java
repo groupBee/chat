@@ -3,12 +3,17 @@ package groupbee.groupbeewebsocket.service;
 import groupbee.groupbeewebsocket.dto.ChatMessageDto;
 import groupbee.groupbeewebsocket.dto.ChatRoomDto;
 import groupbee.groupbeewebsocket.dto.UserDto;
+import groupbee.groupbeewebsocket.entity.ChatRoomListEntity;
+import groupbee.groupbeewebsocket.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +23,9 @@ import java.util.Map;
 public class ChatService {
     private final KafkaTemplate<String, ChatMessageDto> kafkaTemplate;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ChatRoomRepository chatRoomRepository;
 
+    @Transactional
     public void processMessage(ChatMessageDto message) {
         String kafkaTopic = message.getTopic();
 
@@ -41,5 +48,26 @@ public class ChatService {
         if (message.getFileUrl() != null && !message.getFileUrl().isEmpty()) {
             System.out.println("File attached: " + message.getFileUrl());
         }
+        //message.setTimestamp(LocalDateTime.now());
+        updateChatRoomInfo(message);
+    }
+
+    private void updateChatRoomInfo(ChatMessageDto message) {
+        ChatRoomListEntity chatRoom = chatRoomRepository.findByChatRoomId(message.getChatRoomId());
+
+        // 채팅방이 null일 경우 예외 발생
+        if (chatRoom == null) {
+            throw new IllegalArgumentException("채팅방을 찾을 수 없습니다: " + message.getChatRoomId());
+        }
+
+        // 마지막 메시지와 마지막 활성화 시간 업데이트
+        chatRoom.setLastMessage(message.getContent());
+        chatRoom.setLastActive(LocalDateTime.now());
+
+        // 변경된 채팅방 정보를 저장
+        chatRoomRepository.save(chatRoom);
+
+        log.info("채팅방 정보 업데이트: 채팅방 ID = {}, 마지막 메시지 = {}, 마지막 활성화 시간 = {}",
+                chatRoom.getChatRoomId(), chatRoom.getLastMessage(), chatRoom.getLastActive());
     }
 }

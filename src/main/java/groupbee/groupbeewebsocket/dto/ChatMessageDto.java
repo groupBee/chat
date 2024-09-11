@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,5 @@ public class ChatMessageDto {
     private String announcement;    // 공지사항일 경우 내용
     private String fileUrl;         // 첨부파일 경로 (선택적)
     private Date timestamp;         // 메시지 전송 시간
-//    private List<Map<String, Integer>> isReadCount;
     private String topic;           // Kafka 토픽
 }

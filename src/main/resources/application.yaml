@@ -1,6 +1,6 @@
 server:
-  port: 9522
-#  port: 9999
+#  port: 9522
+  port: 9999
 spring:
   kafka:
     bootstrap-servers: ${KAFKA_URL}
