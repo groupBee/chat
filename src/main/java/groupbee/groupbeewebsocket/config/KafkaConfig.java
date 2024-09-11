@@ -26,8 +26,7 @@ import java.util.Map;
 @EnableKafka
 @Configuration
 public class KafkaConfig {
-    private final Dotenv dotenv = Dotenv.load();
-    String bootstrapServers = dotenv.get("KAFKA_BOOTSTRAP_SERVERS");
+    String bootstrapServers = System.getenv("KAFKA_BOOTSTRAP_SERVERS");
 
     // ChatRoomDto 관련 설정
     @Bean

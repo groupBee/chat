@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Getter
@@ -41,4 +43,20 @@ public class ChatRoomListEntity {
 
     @Column(nullable = false)
     private String topic; // 그룹 채팅 여부
+
+    // 사용자별 읽지 않은 메시지 수 (userId -> unreadMessageCount)
+    @ElementCollection
+    @CollectionTable(name = "unread_messages", joinColumns = @JoinColumn(name = "chat_room_id"))
+    @MapKeyColumn(name = "user_id")
+    @Column(name = "unread_count")
+    private Map<String, Integer> unreadMessageCount = new HashMap<>();
+
+    // 읽지 않은 메시지 수 업데이트 메서드
+    public void incrementUnreadCount(String userId) {
+        unreadMessageCount.put(userId, unreadMessageCount.getOrDefault(userId, 0) + 1);
+    }
+
+    public void resetUnreadCount(String userId) {
+        unreadMessageCount.put(userId, 0);
+    }
 }
