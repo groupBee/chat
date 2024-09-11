@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,6 +62,21 @@ public class ChatService {
         // 마지막 메시지와 마지막 활성화 시간 업데이트
         chatRoom.setLastMessage(message.getContent());
         chatRoom.setLastActive(LocalDateTime.now());
+
+        // UserEntity -> UserDto 변환 (Stream API 사용)
+        List<UserDto> participantDtos = chatRoom.getParticipants()
+                .stream()
+                .map(participant -> new UserDto(participant.getUserId(), participant.getName())) // UserEntity -> UserDto 변환
+                .toList();
+
+        // 읽지 않은 메시지 수 관리
+        for (UserDto participantDto : participantDtos) {
+            // 메시지 보낸 사용자는 제외
+            if (!participantDto.getUserId().equals(message.getSenderId())) {
+                // incrementUnreadCount 메서드 사용하여 읽지 않은 메시지 수 증가
+                chatRoom.incrementUnreadCount(participantDto.getUserId());
+            }
+        }
 
         // 변경된 채팅방 정보를 저장
         chatRoomRepository.save(chatRoom);

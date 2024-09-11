@@ -1,9 +1,9 @@
 server:
-  port: 9522
-#  port: 9999
+#  port: 9522
+  port: 9999
 spring:
   kafka:
-    bootstrap-servers: ${KAFKA_URL}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     consumer:
       group-id: chat-group
       auto-offset-reset: earliest       # 토픽의 처음부터 읽기
