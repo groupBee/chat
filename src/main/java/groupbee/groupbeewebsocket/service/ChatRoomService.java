@@ -1,9 +1,11 @@
 package groupbee.groupbeewebsocket.service;
 
+import groupbee.groupbeewebsocket.dto.ChatMessageDto;
 import groupbee.groupbeewebsocket.dto.ChatRoomDto;
 import groupbee.groupbeewebsocket.dto.UserDto;
 import groupbee.groupbeewebsocket.entity.ChatRoomListEntity;
 import groupbee.groupbeewebsocket.entity.UserEntity;
+import groupbee.groupbeewebsocket.repository.ChatMessageRepository;
 import groupbee.groupbeewebsocket.repository.ChatRoomRepository;
 import groupbee.groupbeewebsocket.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class ChatRoomService {
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final List<ChatRoomDto> chatRoomList = new ArrayList<>(); // 메시지 저장소
+    private final ChatMessageRepository chatMessageRepository;
 
     // 새로운 채팅방 생성
     public void createChatRoom(ChatRoomDto chatRoomDto) {
@@ -90,5 +93,10 @@ public class ChatRoomService {
                 .orElseThrow(() -> new IllegalArgumentException("ChatRoomService exitChatRoom" + userId));
         chatRoom.getParticipants().remove(user);
         chatRoomRepository.save(chatRoom);
+    }
+
+    public List<ChatMessageDto> getMessageDetail(String chatRoomId) {
+        log.info(chatMessageRepository.findByChatRoomId(chatRoomId).toString());
+        return chatMessageRepository.findByChatRoomId(chatRoomId);
     }
 }

@@ -33,7 +33,8 @@ public class ChatRoomController {
 
     @GetMapping("/chatting/history")
     public List<ChatMessageDto> getChatHistory(@RequestParam String chatRoomId) {
-        return kafkaConsumerService.getChatHistory(chatRoomId);
+//        return kafkaConsumerService.getChatHistory(chatRoomId);
+        return chatRoomService.getMessageDetail(chatRoomId);
     }
 
     @PostMapping("/chatting/list")

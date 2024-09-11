@@ -1,6 +1,6 @@
 server:
-  port: 9999
-
+  port: 9522
+#  port: 9999
 spring:
   kafka:
     bootstrap-servers: ${KAFKA_URL}
@@ -19,6 +19,12 @@ spring:
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: groupbee
+
 
   servlet:
     multipart:
