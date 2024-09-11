@@ -49,7 +49,7 @@ public class ChatRoomListEntity {
     @CollectionTable(name = "unread_messages", joinColumns = @JoinColumn(name = "chat_room_id"))
     @MapKeyColumn(name = "user_id")
     @Column(name = "unread_count")
-    private Map<String, Integer> unreadMessageCount = new HashMap<>();
+    private Map<String, Integer> unreadMessageCount;
 
     // 읽지 않은 메시지 수 업데이트 메서드
     public void incrementUnreadCount(String userId) {

@@ -2,7 +2,6 @@ package groupbee.groupbeewebsocket.config;
 
 import groupbee.groupbeewebsocket.dto.ChatMessageDto;
 import groupbee.groupbeewebsocket.dto.ChatRoomDto;
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
