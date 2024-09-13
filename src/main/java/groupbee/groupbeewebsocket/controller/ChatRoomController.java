@@ -26,6 +26,7 @@ public class ChatRoomController {
         String UUID = java.util.UUID.randomUUID().toString();
         chatRoomDto.setChatRoomId(UUID);
         chatRoomService.createChatRoom(chatRoomDto);
+        System.out.println("데이터 테스트 입니다. : " + chatRoomDto);
         return chatRoomDto;
     }
 

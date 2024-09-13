@@ -24,4 +24,5 @@ public class ChatMessageDto {
     private String fileUrl;         // 첨부파일 경로 (선택적)
     private Date timestamp;         // 메시지 전송 시간
     private String topic;           // Kafka 토픽
+    private String profile;
 }

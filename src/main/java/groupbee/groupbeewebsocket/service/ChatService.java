@@ -66,7 +66,7 @@ public class ChatService {
         // UserEntity -> UserDto 변환 (Stream API 사용)
         List<UserDto> participantDtos = chatRoom.getParticipants()
                 .stream()
-                .map(participant -> new UserDto(participant.getUserId(), participant.getName())) // UserEntity -> UserDto 변환
+                .map(participant -> new UserDto(participant.getUserId(), participant.getName(), participant.getProfile())) // UserEntity -> UserDto 변환
                 .toList();
 
         // 읽지 않은 메시지 수 관리

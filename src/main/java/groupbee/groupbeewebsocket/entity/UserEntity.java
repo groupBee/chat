@@ -21,4 +21,7 @@ public class UserEntity {
 
     @Column(nullable = false)
     private String name; // api/employee/info -> name
+
+    @Column
+    private String profile;
 }
