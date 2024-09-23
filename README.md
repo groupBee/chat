@@ -1,4 +1,4 @@
-# Chatting 
+# Chatting 💬
 
 ## 개요
 이 프로젝트는 React와 WebSocket을 사용하여 **실시간 채팅 애플리케이션**을 구현한 프로젝트입니다.  
